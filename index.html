@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hazard - Ocean Hazard Monitoring System</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <button class="menu-toggle" id="menuToggle">☰</button>
+                    <div class="logo-section">
+                        <!-- <h1 data-lang-key="appTitle">HarborAlert</h1> -->
+                        <h1 data-lang-key="appTitle">HarborAlert</h1>
+                        <span class="logo-subtitle" data-lang-key="subtitle">Ocean Information Services</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="language-selector">
+                        <select id="languageSelect" class="form-control">
+                            <option value="english">English</option>
+                            <option value="hindi">हिंदी</option>
+                            <option value="bengali">বাংলা</option>
+                            <option value="marathi">मराठी</option>
+                            <option value="telugu">తెలుగు</option>
+                            <option value="tamil">தமிழ்</option>
+                            <option value="gujarati">ગુજરાતી</option>
+                            <option value="urdu">اردو</option>
+                        </select>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-role" id="userRole" data-lang-key="userRole">Official</span>
+                        <div class="notification-bell" id="notificationBell">
+                            <span class="bell-icon">🔔</span>
+                            <span class="notification-count" id="notificationCount">3</span>
+                        </div>
+                        <div class="user-avatar">👤</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <button class="nav-link active" data-page="dashboard">
+                        <span class="nav-icon">📊</span>
+                        <span data-lang-key="dashboard">Dashboard</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-page="report-hazard">
+                        <span class="nav-icon">⚠️</span>
+                        <span data-lang-key="reportHazard">Report Hazard</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-page="social-monitor">
+                        <span class="nav-icon">📱</span>
+                        <span data-lang-key="socialMonitor">Social Monitor</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-page="analytics">
+                        <span class="nav-icon">📈</span>
+                        <span data-lang-key="analytics">Analytics</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-page="early-warning">
+                        <span class="nav-icon">🚨</span>
+                        <span data-lang-key="earlyWarning">Early Warning</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-page="user-management">
+                        <span class="nav-icon">👥</span>
+                        <span data-lang-key="userManagement">User Management</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-page="hotspot-analysis">
+                        <span class="nav-icon">🔥</span>
+                        <span data-lang-key="hotspotAnalysis">Hotspot Analysis</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-page="settings">
+                        <span class="nav-icon">⚙️</span>
+                        <span data-lang-key="settings">Settings</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-page="about">
+                        <span class="nav-icon">ℹ️</span>
+                        <span data-lang-key="about">About</span>
+                    </button>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+                <div class="page-header">
+                    <h2 data-lang-key="dashboard">Dashboard</h2>
+                    <div class="page-actions">
+                        <div class="last-updated">
+                            <span data-lang-key="lastUpdated">Last Updated:</span> 
+                            <span id="lastUpdated">--:--</span>
+                        </div>
+                        <button class="btn btn--primary" id="refreshData">
+                            <span data-lang-key="refresh">🔄 Refresh</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalReports">142</div>
+                            <div class="stat-label" data-lang-key="totalReports">Total Reports</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="activeAlerts">5</div>
+                            <div class="stat-label" data-lang-key="activeAlerts">Active Alerts</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="verifiedReports">98</div>
+                            <div class="stat-label" data-lang-key="verifiedReports">Verified Reports</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="responseTime">2.5m</div>
+                            <div class="stat-label" data-lang-key="responseTime">Avg Response Time</div>
+                        </div>
+                    </div>
+
+                    <div class="map-container">
+                        <div class="map-header">
+                            <h3 data-lang-key="hazardMap">Ocean Hazard Map</h3>
+                            <div class="map-controls">
+                                <button class="btn btn--sm btn--outline active" id="filterAll" data-lang-key="all">All</button>
+                                <button class="btn btn--sm btn--outline" id="filterTsunami" data-lang-key="tsunami">Tsunami</button>
+                                <button class="btn btn--sm btn--outline" id="filterSurge" data-lang-key="stormSurge">Storm Surge</button>
+                                <button class="btn btn--sm btn--outline" id="filterWaves" data-lang-key="highWaves">High Waves</button>
+                            </div>
+                        </div>
+                        <div id="map" style="height: 400px; width: 100%;"></div>
+                    </div>
+
+                    <div class="recent-reports">
+                        <h3 data-lang-key="recentReports">Recent Reports</h3>
+                        <div class="report-list" id="recentReports">
+                            <!-- Recent reports will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Hazard Page -->
+            <div id="report-hazard" class="page">
+                <div class="page-header">
+                    <h2 data-lang-key="reportHazard">Report Ocean Hazard</h2>
+                </div>
+
+                <div class="report-form-container">
+                    <form id="reportForm">
+                        <div class="form-group">
+                            <label class="form-label" data-lang-key="hazardType">Hazard Type:</label>
+                            <select id="hazardType" class="form-control" required>
+                                <option value="" data-lang-key="selectHazardType">Select hazard type</option>
+                                <option value="tsunami" data-lang-key="tsunami">Tsunami</option>
+                                <option value="storm_surge" data-lang-key="stormSurge">Storm Surge</option>
+                                <option value="high_waves" data-lang-key="highWaves">High Waves</option>
+                                <option value="coastal_flooding" data-lang-key="coastalFlooding">Coastal Flooding</option>
+                                <option value="abnormal_tide" data-lang-key="abnormalTide">Abnormal Tide</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" data-lang-key="location">Location:</label>
+                            <input type="text" id="reportLocation" class="form-control" placeholder="Enter location or coordinates" required>
+                            <button type="button" class="btn btn--secondary btn--sm mt-8" id="useGPS">
+                                <span data-lang-key="useCurrentLocation">📍 Use Current Location</span>
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" data-lang-key="severity">Severity Level:</label>
+                            <select id="severityLevel" class="form-control" required>
+                                <option value="" data-lang-key="selectSeverity">Select severity</option>
+                                <option value="low" data-lang-key="low">Low</option>
+                                <option value="moderate" data-lang-key="moderate">Moderate</option>
+                                <option value="high" data-lang-key="high">High</option>
+                                <option value="critical" data-lang-key="critical">Critical</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" data-lang-key="description">Description:</label>
+                            <textarea id="reportDescription" class="form-control" rows="4" placeholder="Provide detailed description of the hazard" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" data-lang-key="contactInfo">Contact Information:</label>
+                            <input type="text" id="contactInfo" class="form-control" placeholder="Your contact information (optional)">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" data-lang-key="mediaUpload">Media Upload:</label>
+                            <input type="file" id="mediaUpload" class="form-control" accept="image/*,video/*" multiple>
+                            <div class="file-info" data-lang-key="fileInfo">Upload photos or videos (max 10MB each)</div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn--primary">
+                                <span data-lang-key="submitReport">Submit Report</span>
+                            </button>
+                            <button type="button" class="btn btn--secondary" id="saveDraft">
+                                <span data-lang-key="saveDraft">Save as Draft</span>
+                            </button>
+                        </div>
+
+                        <div class="offline-status" id="offlineStatus" style="display: none;">
+                            <span data-lang-key="offlineMode">🔵 Offline Mode - Report will be submitted when connection is restored</span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Social Media Monitor Page -->
+            <div id="social-monitor" class="page">
+                <div class="page-header">
+                    <h2 data-lang-key="socialMonitor">Social Media Monitor</h2>
+                    <div class="social-controls">
+                        <input type="text" id="keywordFilter" class="form-control" placeholder="Filter by keywords">
+                        <select id="platformFilter" class="form-control">
+                            <option value="">All Platforms</option>
+                            <option value="twitter">Twitter</option>
+                            <option value="facebook">Facebook</option>
+                            <option value="youtube">YouTube</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="social-dashboard">
+                    <div class="social-stats">
+                        <div class="stat-card">
+                            <div class="stat-value">1,234</div>
+                            <div class="stat-label" data-lang-key="totalMentions">Total Mentions</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">89%</div>
+                            <div class="stat-label" data-lang-key="verificationRate">Verification Rate</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">23</div>
+                            <div class="stat-label" data-lang-key="alertsGenerated">Alerts Generated</div>
+                        </div>
+                    </div>
+
+                    <div class="social-feed" id="socialFeed">
+                        <!-- Social media posts will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Page -->
+            <div id="analytics" class="page">
+                <div class="page-header">
+                    <h2 data-lang-key="analytics">Analytics & Reports</h2>
+                    <div class="analytics-controls">
+                        <select class="form-control">
+                            <option>Last 30 Days</option>
+                            <option>Last 3 Months</option>
+                            <option>Last Year</option>
+                        </select>
+                        <button class="btn btn--primary" id="exportData">
+                            <span data-lang-key="exportData">📊 Export Data</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="analytics-grid">
+                    <div class="chart-container">
+                        <h3 data-lang-key="hazardTypes">Hazard Types Distribution</h3>
+                        <canvas id="hazardChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3 data-lang-key="regionalStats">Regional Statistics</h3>
+                        <canvas id="regionalChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3 data-lang-key="trendAnalysis">Trend Analysis</h3>
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Early Warning Page -->
+            <div id="early-warning" class="page">
+                <div class="page-header">
+                    <h2 data-lang-key="earlyWarning">Early Warning System</h2>
+                    <button class="btn btn--primary" id="issueAlert">
+                        <span data-lang-key="issueAlert">🚨 Issue Alert</span>
+                    </button>
+                </div>
+
+                <div class="warning-dashboard">
+                    <div class="active-warnings" id="activeWarnings">
+                        <h3 data-lang-key="activeWarnings">Active Warnings</h3>
+                        <div class="warning-list">
+                            <!-- Active warnings will be loaded here -->
+                        </div>
+                    </div>
+
+                    <div class="warning-form hidden" id="warningForm">
+                        <h3 data-lang-key="issueNewWarning">Issue New Warning</h3>
+                        <form id="newWarningForm">
+                            <div class="form-group">
+                                <label class="form-label" data-lang-key="warningType">Warning Type:</label>
+                                <select class="form-control" required>
+                                    <option value="tsunami">Tsunami Warning</option>
+                                    <option value="storm_surge">Storm Surge Warning</option>
+                                    <option value="high_waves">High Waves Warning</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" data-lang-key="region">Affected Region:</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" data-lang-key="message">Warning Message:</label>
+                                <textarea class="form-control" rows="4" required></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn--primary">
+                                    <span data-lang-key="issueWarning">Issue Warning</span>
+                                </button>
+                                <button type="button" class="btn btn--secondary" id="cancelWarning">
+                                    <span data-lang-key="cancel">Cancel</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Management Page -->
+            <div id="user-management" class="page">
+                <div class="page-header">
+                    <h2 data-lang-key="userManagement">User Management</h2>
+                    <button class="btn btn--primary" id="addUser">
+                        <span data-lang-key="addUser">👤 Add User</span>
+                    </button>
+                </div>
+
+                <div class="user-table-container">
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th data-lang-key="name">Name</th>
+                                <th data-lang-key="role">Role</th>
+                                <th data-lang-key="location">Location</th>
+                                <th data-lang-key="status">Status</th>
+                                <th data-lang-key="lastActive">Last Active</th>
+                                <th data-lang-key="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <!-- User data will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Hotspot Analysis Page -->
+            <div id="hotspot-analysis" class="page">
+                <div class="page-header">
+                    <h2 data-lang-key="hotspotAnalysis">Hotspot Analysis</h2>
+                    <div class="hotspot-controls">
+                        <select class="form-control">
+                            <option>Last 24 Hours</option>
+                            <option>Last 7 Days</option>
+                            <option>Last 30 Days</option>
+                        </select>
+                        <button class="btn btn--primary" id="generateHotspots">
+                            <span data-lang-key="generateHotspots">🔍 Generate Hotspots</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="hotspot-dashboard">
+                    <div class="hotspot-map">
+                        <h3 data-lang-key="hotspotMap">Risk Hotspots</h3>
+                        <div id="hotspotMap" style="height: 500px; width: 100%;"></div>
+                    </div>
+                    <div class="hotspot-list">
+                        <h3 data-lang-key="highRiskAreas">High Risk Areas</h3>
+                        <div class="hotspot-items" id="hotspotItems">
+                            <!-- Hotspot items will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="settings" class="page">
+                <div class="page-header">
+                    <h2 data-lang-key="settings">Settings</h2>
+                </div>
+
+                <div class="settings-container">
+                    <div class="settings-section">
+                        <h3 data-lang-key="generalSettings">General Settings</h3>
+                        <div class="form-group">
+                            <label class="form-label" data-lang-key="defaultLanguage">Default Language:</label>
+                            <select id="defaultLanguage" class="form-control">
+                                <option value="english">English</option>
+                                <option value="hindi">हिंदी</option>
+                                <option value="bengali">বাংলা</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" data-lang-key="refreshInterval">Data Refresh Interval:</label>
+                            <select id="refreshInterval" class="form-control">
+                                <option value="30">30 seconds</option>
+                                <option value="60">1 minute</option>
+                                <option value="300">5 minutes</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3 data-lang-key="notifications">Notifications</h3>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="emailNotifications" checked>
+                                <span data-lang-key="emailNotifications">Email Notifications</span>
+                            </label>
+                            <label>
+                                <input type="checkbox" id="smsNotifications">
+                                <span data-lang-key="smsNotifications">SMS Notifications</span>
+                            </label>
+                            <label>
+                                <input type="checkbox" id="pushNotifications" checked>
+                                <span data-lang-key="pushNotifications">Push Notifications</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Page -->
+            <div id="about" class="page">
+                <div class="page-header">
+                    <h2 data-lang-key="about">About</h2>
+                </div>
+
+                <div class="about-content">
+                    <div class="about-section">
+                        <h3 data-lang-key="aboutSystem">About the System</h3>
+                        <p data-lang-key="systemDescription">
+                            The Ocean Hazard Monitoring System is a comprehensive platform designed to monitor, 
+                            analyze, and provide early warnings for ocean-related hazards affecting coastal regions.
+                        </p>
+                    </div>
+
+                    <div class="about-section">
+                        <h3 data-lang-key="features">Features</h3>
+                        <ul>
+                            <li data-lang-key="feature1">Real-time hazard monitoring and reporting</li>
+                            <li data-lang-key="feature2">Social media integration for crowd-sourced data</li>
+                            <li data-lang-key="feature3">Advanced analytics and trend analysis</li>
+                            <li data-lang-key="feature4">Multi-language support</li>
+                            <li data-lang-key="feature5">Mobile-responsive design</li>
+                        </ul>
+                    </div>
+
+                    <div class="about-section contact-info">
+                        <h3 data-lang-key="contact">Contact Information</h3>
+                        <p><strong data-lang-key="email">Email:</strong> support@incois.gov.in</p>
+                        <p><strong data-lang-key="phone">Phone:</strong> +91-40-23886006</p>
+                        <p><strong data-lang-key="address">Address:</strong> INCOIS, Pragathi Nagar, Hyderabad</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Emergency Alert Modal -->
+    <div class="modal hidden" id="alertModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="alertTitle">Emergency Alert</h3>
+                <button class="modal-close" id="closeAlert">×</button>
+            </div>
+            <div class="modal-body">
+                <p id="alertMessage">This is an emergency alert message.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--primary" id="acknowledgeAlert">Acknowledge</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load scripts in correct order -->
+    <script src="data.js"></script>
+    <script src="translations.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
